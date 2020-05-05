@@ -58,40 +58,12 @@ namespace :book do
     new_contents = text.gsub("$$VERSION$$", version_string).gsub("$$DATE$$", Time.now.strftime("%Y-%m-%d"))
     File.open("#{progit_v}.asc", "w") {|file| file.puts new_contents }
 
-    puts "Converting to HTML..."
-    exec_or_raise("bundle exec asciidoctor #{progit_v}.asc")
-    puts " -- HTML output at #{progit_v}.html"
-
     puts "Converting to EPub..."
     exec_or_raise("bundle exec asciidoctor-epub3 #{progit_v}.asc")
     puts " -- Epub output at #{progit_v}.epub"
 
     exec_or_raise("epubcheck #{progit_v}.epub")
-
-    puts "Converting to Mobi (kf8)..."
-    exec_or_raise("bundle exec asciidoctor-epub3 -a ebook-format=kf8 #{progit_v}.asc")
-    # remove the fake epub that would shadow the really one
-    exec_or_raise("rm progit*kf8.epub")
-    puts " -- Mobi output at #{progit_v}.mobi"
-
     repo = ENV['TRAVIS_REPO_SLUG']
-    puts "Converting to PDF... (this one takes a while)"
-    if (repo == "progit/progit2-zh")
-      exec_or_raise("asciidoctor-pdf-cjk-kai_gen_gothic-install")
-      exec_or_raise("bundle exec asciidoctor-pdf -r asciidoctor-pdf-cjk -r asciidoctor-pdf-cjk-kai_gen_gothic -a pdf-style=KaiGenGothicCN #{progit_v}.asc")
-    elsif (repo == "progit/progit2-ja")
-      exec_or_raise("asciidoctor-pdf-cjk-kai_gen_gothic-install")
-      exec_or_raise("bundle exec asciidoctor-pdf -r asciidoctor-pdf-cjk -r asciidoctor-pdf-cjk-kai_gen_gothic -a pdf-style=KaiGenGothicJP #{progit_v}.asc")
-    elsif (repo == "progit/progit2-zh-tw")
-      exec_or_raise("asciidoctor-pdf-cjk-kai_gen_gothic-install")
-      exec_or_raise("bundle exec asciidoctor-pdf -r asciidoctor-pdf-cjk -r asciidoctor-pdf-cjk-kai_gen_gothic -a pdf-style=KaiGenGothicTW #{progit_v}.asc")
-    elsif (repo == "progit/progit2-ko")
-      exec_or_raise("asciidoctor-pdf-cjk-kai_gen_gothic-install")
-      exec_or_raise("bundle exec asciidoctor-pdf -r asciidoctor-pdf-cjk -r asciidoctor-pdf-cjk-kai_gen_gothic -a pdf-style=KaiGenGothicKR #{progit_v}.asc")
-    else
-      exec_or_raise("bundle exec asciidoctor-pdf #{progit_v}.asc 2>/dev/null")
-    end
-    puts " -- PDF output at #{progit_v}.pdf"
   end
 
   desc 'tag the repo with the latest version'
